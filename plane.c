@@ -1,30 +1,28 @@
 #include "apilib.h"
 #include <stdio.h>
 
-int rand();/*0 32767*/
-void move(int win ,int i, int timer, char *keyflag);
+ int rand();/*0 32767*/
+ int planex=100;
+ int planey=180; //plane初始坐标 
+ int flag = 0;  //只生成一次8个enenmy 
+ void move(int win ,int i, int timer, char *keyflag);
 
-
-    int planex=100;
-    int planey=180;
-    int flag = 0;
-    
-    struct Enemy{
+    struct Enemy{   // 敌人（陨石  @） 
     	int x;
-    	int y;
-    	
+    	int y;   	
     }enemy[8];
 
 void HariMain(void)
 {
+   
 	int win, i;
 	char buf[200 * 200];
 	char keyflag[4];
 	win = api_openwin(buf, 200, 200, -1, "plane");
+	 start: 
 	api_boxfilwin(win, 5, 25, 195, 195, 0);
-	
 	//struct Enemy *enemy = api_malloc(sizeof(struct Enemy));
-	
+	int s = 9999999;    //控制速度 
 	int timer;
 	timer = api_alloctimer();
 	api_inittimer(timer, 128);
@@ -36,10 +34,9 @@ void HariMain(void)
 		   for(e = 0;e < 8; e++)
 		   {
 		   	enemy[e].y = rand()/1310+25;
-			enemy[e].x = rand()/173 + 3;
-		   
+			enemy[e].x = rand()/173 + 3;		   
 	       }
-	       flag = 1;
+	       flag = 1;        //只生成一次 
 	    }
 	    
 
@@ -47,40 +44,43 @@ void HariMain(void)
 		{
 			api_putstrwin(win,enemy[e].x, enemy[e].y, 0, 1, "@"); //用黑色覆盖轨迹 
 			enemy[e].y = enemy[e].y+5;	  //move down
-			api_putstrwin(win,enemy[e].x, enemy[e].y, 3, 1, "@");  //显示新位置 
+			api_putstrwin(win,enemy[e].x, enemy[e].y, 3, 1, "@");  //显示飞机新位置 
 			
-			if(enemy[e].y > 180){
+			if(enemy[e].y > 180)
+			{
 				api_putstrwin(win,enemy[e].x, enemy[e].y, 0, 1, "@");
 				enemy[e].y = rand()/1310+25;
 				enemy[e].x = rand()/173 + 3;
+				if(s>99999)
+				    {
+					s = s - 99999 ;   //加速 
+					} 
 			}
 			
 			
 			if(planex >enemy[e].x-20 && planex <enemy[e].x+3)            //判断碰撞 
 			 	if(planey >enemy[e].y-3 && planey <enemy[e].y+3)
 			 {
-			 	api_putstrwin(win + 1, 100, 100, 1, 9, "GAME OVER");
-			 	int t = 0;
-			 	for(t=0;t<999999999;t++){}
-			 	break;
-			 }
-		
+			 	api_putstrwin(win , 100, 100, 1, 9, "GAME OVER");			 	
+				 while(1)
+				 {				 	 	
+				   if (api_getkey(1) == 0x0a) 
+				    {
+				    goto start;
+					} /* enter重新开始 */
+				}
+			 }		
 		}
 				
-		int t=0; 
-		for(t=0; t<9999999;t++){}   // wait.....
-		
-
-		move(win,1, timer, keyflag);	
-		
+		int t = 0; 
+		for(t=0; t<s; t++){}   // 陨石速度控制，s递减陨石加速 
+		move(win,1, timer, keyflag);		
 	}
 	api_end();
 }
 
 void move(int win ,int i, int timer, char *keyflag)
 {
-		
-	
 	int j;
 	if (i > 0) {
 		api_settimer(timer, i);
@@ -110,7 +110,7 @@ void move(int win ,int i, int timer, char *keyflag)
 		    if ( planey <=  180) {api_putstrwin(win, planex, planey, 0, 3, "^$^"); planey += 5; }
 		}		
 	}
-	api_putstrwin(win, planex, planey, 3, 3, "^$^");
+	api_putstrwin(win, planex, planey, 3, 3, "^$^");   //打印飞机新位置 
 	return;
 }
 
