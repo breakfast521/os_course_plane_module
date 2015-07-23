@@ -1,0 +1,4 @@
+运行说明
+1.将项目文件夹拷贝到tolset文件夹下。
+2.进入项目文件夹，找到plane文件夹。进入plane后运行“!cons_nt.bat”  输入make run 启动操作系统
+3.在操作系统中的console中输入plane，即可启动用户程序plane。
